@@ -6,7 +6,7 @@ image:
 ports:
   - port: 3000
     description: main application port
-    onOpen: open-browser
+    onOpen: ignore
     visibility: public
   - port: 3001
     description: development server port
