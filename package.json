@@ -24,6 +24,10 @@
     "/public/build"
   ],
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.1",
+    "@mui/material": "^5.14.2",
     "@remix-run/css-bundle": "^1.19.1",
     "@remix-run/node": "^1.19.1",
     "@remix-run/react": "v0.0.0-nightly-9eeef33-20230723",
