@@ -1,3 +1,6 @@
+import Header from '~/components/header';
+import styles from '~/styles/main.css';
+import { ChakraProvider, extendTheme} from "@chakra-ui/react";
 import { cssBundleHref } from "@remix-run/css-bundle";
 import type { LinksFunction } from "@remix-run/node";
 import {
@@ -14,23 +17,51 @@ import stylesheet from "~/tailwind.css";
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
+  { rel: 'stylesheet', href: styles }
 ];
 
-export default function App() {
+const theme = extendTheme({
+  colors: {
+    ea: {
+      blue: "#00239c",
+    },
+  },
+})
+
+
+function Document({
+  children,
+  title = "App title",
+}: {
+  children: React.ReactNode;
+  title?: string;
+}) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en">
       <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
+        <title>{title}</title>
         <Links />
       </head>
-      <body className="h-full">
-        <Outlet />
+      <body>
+        <Header/>
+        {children}
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
       </body>
     </html>
+  );
+}
+
+export default function App() {
+  // throw new Error("💣💥 Booooom");
+
+  return (
+    <Document>
+      <ChakraProvider theme={theme} >
+        <Outlet />
+      </ChakraProvider>
+    </Document>
   );
 }

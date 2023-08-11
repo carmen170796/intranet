@@ -24,7 +24,9 @@
     "/public/build"
   ],
   "dependencies": {
+    "@chakra-ui/react": "^2.8.0",
     "@emotion/react": "^11.11.1",
+    "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.1",
     "@mui/material": "^5.14.2",
@@ -34,6 +36,7 @@
     "@remix-run/serve": "^1.19.1",
     "bcryptjs": "^2.4.3",
     "dotenv-cli": "^7.2.1",
+    "framer-motion": "^6.5.1",
     "isbot": "^3.6.12",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
