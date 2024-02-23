@@ -4,6 +4,8 @@ import { Form,   useRouteError, isRouteErrorResponse, useLoaderData} from "@remi
 import { getSession} from './sessions';
 import LogoutButton  from '~/components/LogoutButton';
 import { getEmployees} from "~/utils/claims";
+import { useState } from 'react';
+import SpinnerComponent from '~/components/Spinner';
 
 export async function loader({ request} : LoaderArgs) {
 
@@ -44,11 +46,20 @@ export const meta: V2_MetaFunction = () => [{ title: "Akten Pro Mitarbeiter" }];
 
 export default function Dashboard() {
     const data =  useLoaderData<typeof loader>()
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = () => {
+        setLoading(true);
+    };
     return(
         <>       
                  <LogoutButton/>     
-                 <Form method='GET' action='/results'>
-                    <Filters data={data}/>
+                 <Form method='GET' action='/results' onSubmit={handleSubmit}>
+                    {loading ? (
+                        <SpinnerComponent /> // Show spinner while loading
+                    ) : (
+                        <Filters data={data} />
+                    )}
                  </Form>
                 
 
