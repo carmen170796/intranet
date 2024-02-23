@@ -8,7 +8,8 @@ import {
     username: string;
     name: string;
   }
-  interface Data_User {
+  
+  export interface Data_User {
     data:{
       error: string | undefined;
       workers: Array<User> ; 
@@ -54,4 +55,4 @@ function WorkersDropdown (data:Data_User) {
     }
 }
 
-export default WorkersDropdown  
+export default WorkersDropdown 

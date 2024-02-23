@@ -7,22 +7,22 @@ import {
     FormHelperText,
   } from '@chakra-ui/react'
 
-  import { useState } from 'react';
+  import type { ChangeEvent} from 'react';
+  import { useState} from 'react';
   import {type ActionArgs, json, redirect, type LoaderArgs, type V2_MetaFunction } from '@remix-run/node';
   import { loginUser} from '~/utils/login'
   import { getSession, commitSession } from './sessions';
   import { Form, useActionData, useNavigation} from "@remix-run/react";
-import { error } from 'console';
 
 function validateUsername (username: any) {
     if (typeof username !== "string" || username.length === 0 ){
-        return "Please provide your username"
+        return "Bitte geben Sie Ihre Anmeldeinformationen ein"
    }
 }
 
 function validatePassword (password: any) {
     if (typeof password !== "string" || password.length === 0 ){
-        return "Please provide your password"
+        return "Bitte geben Sie Ihre Anmeldeinformationen ein"
    }
 }
 
@@ -61,32 +61,25 @@ export async function action({ request }: ActionArgs) {
     
     try{
         const result = await loginUser(username,password)
-        console.log("this is the result",result)
-        if(result) {
-            session.set("login", result.user_ok);
-            session.set("loginUsername", result.user_name);
-            session.set("profile", result.user_profil);
-            session.set("error", result.user_error);
-            session.set("user", result.user_username);
+        
+        session.set("login", result.user_ok);
+        session.set("loginUsername", result.user_name);
+        session.set("profile", result.user_profil);
+        session.set("error", result.user_error);
+        session.set("user", result.user_username);
 
+        return redirect('/', {
+            headers: {
+            "Set-Cookie": await commitSession(session),
+            },
+        })
 
-            console.log("here before redirect")    
-            return redirect('/', {
-                    headers: {
-                    "Set-Cookie": await commitSession(session),
-                    },
-            })
-
-        }   
-        return resultRequest("Check your credentials",200)
+           
     }
     catch(err:any){
-        console.log(err.message)
-        return resultRequest( err.message.message, err.status)
+        return resultRequest( err.message, err.status)
     }
 }
-
-
 
 export const meta: V2_MetaFunction = () => [{ title: "Login" }];
 
@@ -95,7 +88,9 @@ export default function Login() {
     const error = useActionData<typeof action>();
 
     const navigation = useNavigation();
-    const textButton = navigation.state === "submitting" ? "Warten": "Einloggen"
+    const textButton = navigation.state === "submitting" ? "Warten": "Einloggen";
+    const isLoading = navigation.state === "submitting";
+
     return (
             <Form method="post"  className='pl-40'> 
                 <h1 className='text-2xl text-eablue'>ASSISTANCE LOGIN</h1>
@@ -116,7 +111,7 @@ export default function Login() {
                         size='sm' 
                         width='150'
                         value={username}
-                        onChange={event => setUsername(event.target.value)}
+                        onChange={(event:ChangeEvent<HTMLInputElement>) => setUsername(event.target.value)}
                         autoComplete='username'
                         />
                 </FormControl>
@@ -132,12 +127,14 @@ export default function Login() {
 
                 </FormControl>
 
-                <Button
+                <Button 
+                        isLoading={isLoading}
                         mt={4}
                         bg='ea.blue'
+                        _hover={{ bg: "blue.500" }}  
                         color='white' 
                         display='block'
-                        type='submit'
+                        type='submit'                      
                     >
                     {textButton}
                     </Button>

@@ -44,7 +44,6 @@ export const meta: V2_MetaFunction = () => [{ title: "Akten Pro Mitarbeiter" }];
 
 export default function Dashboard() {
     const data =  useLoaderData<typeof loader>()
-    console.log(data)
     return(
         <>       
                  <LogoutButton/>     

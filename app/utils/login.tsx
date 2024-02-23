@@ -34,11 +34,12 @@ export async function loginUser( username: string, password :string ) {
     } 
     
     else {
-      const error = new Error( "There was a problem with our database. Please try again")
-      return Promise.reject({message: error, status: response.status })
+      const message = "Falsche Anmeldeinformationen. Bitte versuchen Sie es erneut"
+      return Promise.reject({message:message, status: response.status})
     }
   }  
   catch (err) {
-    return Promise.reject(err)
+    const message = "Es liegt ein Fehler in unserem Server vor. Bitte kontaktieren Sie den IT-Support"
+    return Promise.reject({message:message, status: 500})
   }
 }

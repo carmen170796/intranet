@@ -56,12 +56,16 @@ export async function getNewClaims({
 
     else {
       // For other error status codes, throw a generic error
-      throw new Error(`Status: ${response.status}`);
+      //throw new Error(`Status: ${response.status}`);
+      const message = "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut. "
+      return Promise.reject({message:message})
     }
 
      
   } catch (err) {
-    console.error('There was an error during fetching:', err.message);
+    const message = "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut. "
+    return Promise.reject({message:message})
+
   }
 }
 
@@ -109,13 +113,14 @@ export async function getEditedClaims({
     }
 
     else {
-      // For other error status codes, throw a generic error
-      throw new Error(`Status: ${response.status}`);
+      const message = "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut. "
+      return Promise.reject({message:message})
     }
 
      
   } catch (err) {
-    console.error('There was an error during fetching:', err.message);
+    const message = "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut. "
+    return Promise.reject({message:message})
   }
 }
 
@@ -133,7 +138,7 @@ export async function getEmployees() {
         "Authorization": `Bearer ${token.access_token}`
       }
     }
-    const response = await fetch( API_URL + "employees", requestOptions)
+    const response = await fetch( API_URL +"employees", requestOptions)
     const data = await response.json()
     if (response.ok) {
       const employees = data.employees;

@@ -2,7 +2,7 @@ import {
   
   type LoaderArgs,
   type V2_MetaFunction,
-  redirect, json
+  redirect
 } from "@remix-run/node";
 import { getSession } from "./sessions";
 import ResultTable from "~/components/ResultTable";
@@ -59,7 +59,8 @@ export async function loader({ request }: LoaderArgs) {
     return response;
         
       } catch (err: any) {
-       throw json({ message: "Sorry we could not process your search." });
+       //throw json({ message: "Sorry we could not process your search." });
+       return err.message
       }
     }
 

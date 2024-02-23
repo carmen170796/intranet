@@ -17,14 +17,14 @@ import { OAUTH_SCOPE, CLIENT_SECRET, CLIENT_ID, OAUTH_URL } from "../constants";
     });
  
     if (!response.ok) {
-      //throw new ResponseError("Bad fetch response", response);
+      throw new Error("Bad fetch response");
     }
-    //console.log(await response.json())
-    return  await response.json() // as OAuthToken;
-    //return answer
+
+    return  await response.json() 
+
+  } catch(error) {
     
-  } catch {
-    
+    console.error("An error has ocurred:", error)
   }
 }
 

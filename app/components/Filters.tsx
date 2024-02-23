@@ -13,7 +13,7 @@ import WorkersDropdown from './WorkersDropdown';
 
 
   export default function Filters ({data}) {
-
+    
     return (
         <Box pl='7rem' pb='2rem'>
                     <Text pb={4}  fontSize='md'>Hier können Sie einschränken, welche Akten Sie sehen wollen:</Text>
@@ -27,6 +27,7 @@ import WorkersDropdown from './WorkersDropdown';
 
                         <Button
                             mt={4}
+                            _hover={{ bg: "blue.500" }}  
                             bg='ea.blue'
                             color='white' 
                             display='block'
