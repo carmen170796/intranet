@@ -1,4 +1,4 @@
-import Header from '~/components/header';
+import Header from '~/components/Header';
 import styles from '~/styles/main.css';
 import { ChakraProvider, extendTheme} from "@chakra-ui/react";
 import { cssBundleHref } from "@remix-run/css-bundle";
@@ -40,7 +40,8 @@ function Document({
     <html lang="en">
       <head>
         <Meta />
-        <title>{title}</title>
+          <meta name="viewport" content="width=device-width,initial-scale=1" charSet="UTF-8"/>
+          <title>{title}</title>
         <Links />
       </head>
       <body>

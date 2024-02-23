@@ -9,7 +9,16 @@ body {
     font-size: 12px;
   }
 
+input{
+  appearance: textfield;
+}
 
 #logo {
     height: 200px;
+}
+
+#logout {
+  display: inline;
+  position: absolute;
+  right: 1rem;
 }

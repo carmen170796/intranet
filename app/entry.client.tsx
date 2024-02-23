@@ -5,25 +5,37 @@
  */
 
 import { RemixBrowser } from "@remix-run/react";
-import { startTransition, StrictMode, useState } from "react";
+import { startTransition, StrictMode, useState, useMemo} from "react";
 import { CacheProvider } from '@emotion/react'
 import { hydrateRoot } from "react-dom/client";
 import { ClientStyleContext } from './context';
-import createEmotionCache, { defaultCache } from './createEmotionCache';
+//import createEmotionCache, { defaultCache } from './createEmotionCache';
+import createEmotionCache from './createEmotionCache';
+
 
 interface ClientCacheProviderProps {
   children: React.ReactNode;
 }
 
 function ClientCacheProvider({ children }: ClientCacheProviderProps) {
-  const [cache, setCache] = useState(defaultCache)
+  //const [cache, setCache] = useState(defaultCache)
+  const [cache, setCache] = useState(createEmotionCache());
 
-  function reset() {
-    setCache(createEmotionCache())
-  }
+
+  //function reset() {
+   // setCache(createEmotionCache())
+  //}
+  const clientStyleContextValue = useMemo(
+    () => ({
+      reset() {
+        setCache(createEmotionCache());
+      },
+    }),
+    []
+  );
 
   return (
-    <ClientStyleContext.Provider value={{ reset }}>
+    <ClientStyleContext.Provider value={ clientStyleContextValue }>
       <CacheProvider value={cache}>{children}</CacheProvider>
     </ClientStyleContext.Provider>
   )
@@ -31,6 +43,7 @@ function ClientCacheProvider({ children }: ClientCacheProviderProps) {
 startTransition(() => {
   hydrateRoot(
     document,
+   // document.getElementById('root')!,
     <StrictMode>
         <ClientCacheProvider>
       <RemixBrowser />

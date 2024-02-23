@@ -5,14 +5,17 @@
  */
 import { PassThrough } from "stream";
 
-import createEmotionCache from "@emotion/cache";
+//import createEmotionCache from "@emotion/cache";
+import createEmotionCache from './createEmotionCache';
 import { CacheProvider as EmotionCacheProvider } from "@emotion/react";
 import createEmotionServer from "@emotion/server/create-instance";
-import type { AppLoadContext, EntryContext } from "@remix-run/node";
+import type { EntryContext } from "@remix-run/node";
 import { Response } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import isbot from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
+//import { renderHeadToString } from 'remix-island';
+//import  Head  from './root';
 
 const ABORT_DELAY = 5000;
 
@@ -21,7 +24,7 @@ const handleRequest = (
   responseStatusCode: number,
   responseHeaders: Headers,
   remixContext: EntryContext,
-  loadContext: AppLoadContext,
+  //loadContext: AppLoadContext,
 ) =>
   isbot(request.headers.get("user-agent"))
     ? handleBotRequest(
@@ -46,21 +49,25 @@ const handleBotRequest = (
 ) =>
   new Promise((resolve, reject) => {
     let didError = false;
-    const emotionCache = createEmotionCache({ key: "css" });
+    const emotionCache = createEmotionCache();
 
     const { pipe, abort } = renderToPipeableStream(
       <EmotionCacheProvider value={emotionCache}>
-        <RemixServer context={remixContext} url={request.url} />
+        <RemixServer context={remixContext} url={request.url} abortDelay={ ABORT_DELAY }/>
       </EmotionCacheProvider>,
       {
         onAllReady: () => {
+          //const head = renderHeadToString({ request, remixContext, Head });
           const reactBody = new PassThrough();
           const emotionServer = createEmotionServer(emotionCache);
 
+          
           const bodyWithStyles = emotionServer.renderStylesToNodeStream();
           reactBody.pipe(bodyWithStyles);
 
           responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set("Cache-Control", "no-cache")
+          responseHeaders.set("X-Content-Type-Options" ,"nosniff")
 
           resolve(
             new Response( reactBody, {
@@ -68,8 +75,13 @@ const handleBotRequest = (
               status: didError ? 500 : responseStatusCode,
             }),
           );
-
+          
+          //reactBody.write(
+          //  `<!DOCTYPE html><html><head>${head}</head><body><div id="root">`,
+          //);
           pipe(reactBody);
+          //reactBody.write(`</div></body></html>`);
+
         },
         onShellError: (error: unknown) => {
           reject(error);
@@ -93,14 +105,15 @@ const handleBrowserRequest = (
 ) =>
   new Promise((resolve, reject) => {
     let didError = false;
-    const emotionCache = createEmotionCache({ key: "css" });
+    const emotionCache = createEmotionCache();
 
     const { pipe, abort } = renderToPipeableStream(
       <EmotionCacheProvider value={emotionCache}>
-        <RemixServer context={remixContext} url={request.url} />
+        <RemixServer context={remixContext} url={request.url} abortDelay={ ABORT_DELAY }/>
       </EmotionCacheProvider>,
       {
         onShellReady: () => {
+          //const head = renderHeadToString({ request, remixContext, Head });
           const reactBody = new PassThrough();
           const emotionServer = createEmotionServer(emotionCache);
 
@@ -108,6 +121,8 @@ const handleBrowserRequest = (
           reactBody.pipe(bodyWithStyles);
 
           responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set("Cache-Control", "no-cache")
+          responseHeaders.set("x-content-type-options" ,"nosniff")
 
           resolve(
             new Response( reactBody, {
@@ -115,8 +130,11 @@ const handleBrowserRequest = (
               status: didError ? 500 : responseStatusCode,
             }),
           );
-
+          //reactBody.write(
+          //  `<!DOCTYPE html><html><head>${head}</head><body><div id="root">`,
+          //);
           pipe(reactBody);
+          //reactBody.write(`</div></body></html>`);
         },
         onShellError: (error: unknown) => {
           reject(error);

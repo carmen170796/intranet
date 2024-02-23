@@ -1,20 +1,18 @@
 // app/sessions.ts
-import { createCookieSessionStorage } from "@remix-run/node"; // or cloudflare/deno
+import { createCookieSessionStorage } from "@remix-run/node"; 
+import { SESSION_SECRET } from "~/constants";
 
-type SessionData = {
-    login_ok: boolean,
+export type SessionData = {
+    login: number,
     loginUsername: string,
-    profil:string,
+    profile:string,
     user:string,
+    error:null|string
 
-};
-
-type SessionFlashData = {
-  error: string;
 };
 
 const { getSession, commitSession, destroySession } =
-  createCookieSessionStorage<SessionData, SessionFlashData>(
+  createCookieSessionStorage<SessionData>(
     {
       cookie: {
         name: "__session",
@@ -22,11 +20,13 @@ const { getSession, commitSession, destroySession } =
         maxAge:  60 * 60 * 24 * 60,
         path: "/",
         sameSite: "lax",
-        secrets: ["s3cret1"], // to change into env 
+        secrets:[SESSION_SECRET],
         secure: true,
         
       },
     }
   );
 
+
 export { getSession, commitSession, destroySession };
+
