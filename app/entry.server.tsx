@@ -14,8 +14,8 @@ import { Response } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import isbot from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
-//import { renderHeadToString } from 'remix-island';
-//import  Head  from './root';
+import { renderHeadToString } from 'remix-island';
+import { Head } from './root';
 
 const ABORT_DELAY = 5000;
 
@@ -28,17 +28,17 @@ const handleRequest = (
 ) =>
   isbot(request.headers.get("user-agent"))
     ? handleBotRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext,
-      )
+      request,
+      responseStatusCode,
+      responseHeaders,
+      remixContext,
+    )
     : handleBrowserRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext,
-      );
+      request,
+      responseStatusCode,
+      responseHeaders,
+      remixContext,
+    );
 export default handleRequest;
 
 const handleBotRequest = (
@@ -52,35 +52,35 @@ const handleBotRequest = (
     const emotionCache = createEmotionCache();
 
     const { pipe, abort } = renderToPipeableStream(
-      <EmotionCacheProvider value={emotionCache}>
-        <RemixServer context={remixContext} url={request.url} abortDelay={ ABORT_DELAY }/>
+      <EmotionCacheProvider value={ emotionCache }>
+        <RemixServer context={ remixContext } url={ request.url } abortDelay={ ABORT_DELAY } />
       </EmotionCacheProvider>,
       {
         onAllReady: () => {
-          //const head = renderHeadToString({ request, remixContext, Head });
+          const head = renderHeadToString({ request, remixContext, Head });
           const reactBody = new PassThrough();
           const emotionServer = createEmotionServer(emotionCache);
 
-          
+
           const bodyWithStyles = emotionServer.renderStylesToNodeStream();
           reactBody.pipe(bodyWithStyles);
 
           responseHeaders.set("Content-Type", "text/html");
           responseHeaders.set("Cache-Control", "no-cache")
-          responseHeaders.set("X-Content-Type-Options" ,"nosniff")
+          responseHeaders.set("X-Content-Type-Options", "nosniff")
 
           resolve(
-            new Response( reactBody, {
+            new Response(reactBody, {
               headers: responseHeaders,
               status: didError ? 500 : responseStatusCode,
             }),
           );
-          
-          //reactBody.write(
-          //  `<!DOCTYPE html><html><head>${head}</head><body><div id="root">`,
-          //);
+
+          reactBody.write(
+            `<!DOCTYPE html><html><head>${head}</head><body><div id="root">`,
+          );
           pipe(reactBody);
-          //reactBody.write(`</div></body></html>`);
+          reactBody.write(`</div></body></html>`);
 
         },
         onShellError: (error: unknown) => {
@@ -108,12 +108,12 @@ const handleBrowserRequest = (
     const emotionCache = createEmotionCache();
 
     const { pipe, abort } = renderToPipeableStream(
-      <EmotionCacheProvider value={emotionCache}>
-        <RemixServer context={remixContext} url={request.url} abortDelay={ ABORT_DELAY }/>
+      <EmotionCacheProvider value={ emotionCache }>
+        <RemixServer context={ remixContext } url={ request.url } abortDelay={ ABORT_DELAY } />
       </EmotionCacheProvider>,
       {
         onShellReady: () => {
-          //const head = renderHeadToString({ request, remixContext, Head });
+          const head = renderHeadToString({ request, remixContext, Head });
           const reactBody = new PassThrough();
           const emotionServer = createEmotionServer(emotionCache);
 
@@ -122,19 +122,19 @@ const handleBrowserRequest = (
 
           responseHeaders.set("Content-Type", "text/html");
           responseHeaders.set("Cache-Control", "no-cache")
-          responseHeaders.set("x-content-type-options" ,"nosniff")
+          responseHeaders.set("x-content-type-options", "nosniff")
 
           resolve(
-            new Response( reactBody, {
+            new Response(reactBody, {
               headers: responseHeaders,
               status: didError ? 500 : responseStatusCode,
             }),
           );
-          //reactBody.write(
-          //  `<!DOCTYPE html><html><head>${head}</head><body><div id="root">`,
-          //);
+          reactBody.write(
+            `<!DOCTYPE html><html><head>${head}</head><body><div id="root">`,
+          );
           pipe(reactBody);
-          //reactBody.write(`</div></body></html>`);
+          reactBody.write(`</div></body></html>`);
         },
         onShellError: (error: unknown) => {
           reject(error);

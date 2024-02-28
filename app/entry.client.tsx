@@ -5,7 +5,7 @@
  */
 
 import { RemixBrowser } from "@remix-run/react";
-import { startTransition, StrictMode, useState, useMemo} from "react";
+import { startTransition, StrictMode, useState, useMemo } from "react";
 import { CacheProvider } from '@emotion/react'
 import { hydrateRoot } from "react-dom/client";
 import { ClientStyleContext } from './context';
@@ -23,7 +23,7 @@ function ClientCacheProvider({ children }: ClientCacheProviderProps) {
 
 
   //function reset() {
-   // setCache(createEmotionCache())
+  // setCache(createEmotionCache())
   //}
   const clientStyleContextValue = useMemo(
     () => ({
@@ -36,17 +36,17 @@ function ClientCacheProvider({ children }: ClientCacheProviderProps) {
 
   return (
     <ClientStyleContext.Provider value={ clientStyleContextValue }>
-      <CacheProvider value={cache}>{children}</CacheProvider>
+      <CacheProvider value={ cache }>{ children }</CacheProvider>
     </ClientStyleContext.Provider>
   )
 }
 startTransition(() => {
   hydrateRoot(
-    document,
-   // document.getElementById('root')!,
+    // document,
+    document.getElementById('root')!,
     <StrictMode>
-        <ClientCacheProvider>
-      <RemixBrowser />
+      <ClientCacheProvider>
+        <RemixBrowser />
       </ClientCacheProvider>
     </StrictMode>
   );
