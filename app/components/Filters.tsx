@@ -28,7 +28,7 @@ import WorkersDropdown from './WorkersDropdown';
                         <Button
                             mt={4}
                             _hover={{ bg: "blue.500" }}  
-                            bg='ea.blue'
+                            className="primaryButton"
                             color='white' 
                             display='block'
                             type='submit'

@@ -86,7 +86,7 @@ export default function SanctionslistFinnscan() {
 
       <Button
         isLoading={ isLoading }
-        bg='blue.500'
+        className="primaryButton"
         color='white'
         display='block'
         type='submit'

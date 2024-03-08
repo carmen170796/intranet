@@ -9,7 +9,7 @@ export default function LogoutButton(){
         
              <Form action="/logout" method="post" id='logout'>
                 <Button 
-                    bg='#dc3545' 
+                    className="secondaryButton"
                     color='white'
                     _hover={{ bg: "#ff585d" }}
                     type='submit'

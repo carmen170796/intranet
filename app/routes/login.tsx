@@ -130,7 +130,7 @@ export default function Login() {
                 <Button 
                         isLoading={isLoading}
                         mt={4}
-                        bg='ea.blue'
+                        className="primaryButton"
                         _hover={{ bg: "blue.500" }}  
                         color='white' 
                         display='block'

@@ -9,7 +9,7 @@ export default function RetryButton(){
         
              <Link to="/">
                 <Button 
-                    bg='#00239c' 
+                    className="primaryButton"
                     color='white'
                     _hover={{ bg: '#00639c' }}
                 >

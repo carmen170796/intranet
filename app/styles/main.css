@@ -22,3 +22,15 @@ input{
   position: absolute;
   right: 1rem;
 }
+
+.primaryButton {
+  background-color: #00239c;
+}
+
+.secondaryButton {
+  background-color: #dc3545  ;
+}
+
+.primaryButton:hover {
+  background-color: #3182ce;
+}
