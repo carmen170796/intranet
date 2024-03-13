@@ -16,3 +16,4 @@ export const FINSCANN_API = process.env.FINSCANN_API ?? 'google.com';
 export const USERNAME = process.env.USERNAME ?? 'google.com';
 export const PASSWORD = process.env.PASSWORD ?? 'google.com';
 export const ORGANIZATIONNAME = process.env.ORGANIZATIONNAME ?? 'google.com';
+export const APPLICATIONID = process.env.APPLICATIONID ?? 'google.com';

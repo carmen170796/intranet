@@ -1,46 +1,92 @@
-import type { dataFields } from "./types";
+import { parse } from "csv-parse/sync";
+import type { APIResponse, DataFields } from "./types";
 import {
+  APPLICATIONID,
   FINSCANN_TEST_API,
   ORGANIZATIONNAME,
   PASSWORD,
   USERNAME,
 } from "~/constants";
 
-export async function processData(data: string | File): Promise<any> {
-  let result = [];
+export async function processData(
+  data: string | File
+): Promise<Partial<APIResponse> | Array<Partial<APIResponse>> | null> {
   if (typeof data === "string") {
-    result = await checkNameFinscan(data);
+    return await checkNameFinscan(data);
   } else {
-    let namesArray = [];
     if (data.type === "text/csv") {
-      namesArray = processCSVFile(data);
-    } else if (data.type === "text/xml") {
+      const searchNames = await processCSVFile(data);
+      let results: Array<Partial<APIResponse>> = [];
+      const dataCollectionPromises = searchNames.map(async (searchName) => {
+        const data: Partial<APIResponse> = await checkNameFinscan(searchName);
+        results.push(data);
+      });
+      await Promise.allSettled(dataCollectionPromises);
+      return results;
+    } /* else if (data.type === "text/xml") {
       namesArray = processXMLFile(data);
     } else {
       namesArray = processDTAFile(data);
-    }
-
-    namesArray.forEach(async (name) => {
-      const res = await checkNameFinscan(name);
-      result.push(res);
-    });
+    } */
   }
-  return result;
+  return null;
 }
 
-function processCSVFile(File: File): Array<string> {
-  return [];
+async function processCSVFile(file: File): Promise<Array<string>> {
+  const fileContent = await file.text();
+  const names = parse(fileContent, {
+    delimiter: ";",
+    from_line: 1,
+  });
+
+  const namesColumnData: string[] = names.map((name: string[]) => name[2]);
+
+  return namesColumnData;
 }
 
-function processXMLFile(File: File): Array<string> {
-  return [];
+// function processXMLFile(File: File): Array<string> {
+//   return [];
+// }
+
+// function processDTAFile(File: File): Array<string> {
+//   return [];
+// }
+
+function extractSpecificData(apiResponse: APIResponse): Partial<APIResponse> {
+  const extractedData = {
+    status: apiResponse.status,
+    message: apiResponse.message,
+    returned: apiResponse.returned,
+    searchResults: apiResponse?.searchResults.map((result) => ({
+      searchName: result.searchName,
+      clientId: result.clientId,
+      clientName: result.clientName,
+      searchMatches: result?.searchMatches?.map((match) => ({
+        listName: match.listName,
+        displayLine: match.displayLine,
+        dynamicFields: {
+          listParentSingleStringName:
+            match?.dynamicFields?.listParentSingleStringName,
+          listSingleStringType: match?.dynamicFields?.listSingleStringType,
+          listGender: match?.dynamicFields?.listGender,
+          listAliases: match?.dynamicFields?.listAliases,
+          listCategory: match?.dynamicFields?.listCategory,
+          listPEPCategory: match?.dynamicFields?.listPEPCategory,
+          listCountries: match?.dynamicFields?.listCountries,
+          listCitizenships: match?.dynamicFields?.listCitizenships,
+          listDOBs: match?.dynamicFields?.listDOBs,
+        },
+        fnsCategories: match.fnsCategories,
+      })),
+    })),
+  };
+
+  return extractedData;
 }
 
-function processDTAFile(File: File): Array<string> {
-  return [];
-}
-
-async function checkNameFinscan(nameLine: string): Promise<any> {
+export async function checkNameFinscan(
+  nameLine: string
+): Promise<Partial<APIResponse>> {
   const clientId =
     "WEB-" +
     new Date()
@@ -51,13 +97,59 @@ async function checkNameFinscan(nameLine: string): Promise<any> {
   const userName = USERNAME;
   const password = PASSWORD;
   const organizationName = ORGANIZATIONNAME;
+  const applicationId = APPLICATIONID;
 
-  const data: Partial<dataFields> = {
+  const data: DataFields = {
     clientId,
     nameLine,
     userName,
     password,
     organizationName,
+    applicationId,
+    lists: [],
+    searchType: 4,
+    clientStatus: 0,
+    gender: "",
+    alternateNames: [],
+    addressLine1: "",
+    addressLine2: "",
+    addressLine3: "",
+    addressLine4: "",
+    addressLine5: "",
+    addressLine6: "",
+    addressLine7: "",
+    specificElement: "",
+    clientSearchCode: 0,
+    returnComplianceRecords: 0,
+    addClient: 0,
+    sendToReview: 1,
+    userFieldsSearch: [],
+    updateUserFields: 0,
+    userField1Label: "",
+    userField1Value: "",
+    userField2Label: "",
+    userField2Value: "",
+    userField3Label: "",
+    userField3Value: "",
+    userField4Label: "",
+    userField4Value: "",
+    userField5Label: "",
+    userField5Value: "",
+    userField6Label: "",
+    userField6Value: "",
+    userField7Label: "",
+    userField7Value: "",
+    userField8Label: "",
+    userField8Value: "",
+    comment: "",
+    passthrough: "",
+    customStatus: [],
+    returnCategory: 0,
+    returnSourceLists: 0,
+    generateclientId: 0,
+    skipSearch: 0,
+    processUBO: 0,
+    UBO_Id: "",
   };
 
   const dataJSON = JSON.stringify(data);
@@ -71,6 +163,16 @@ async function checkNameFinscan(nameLine: string): Promise<any> {
     body: dataJSON,
   });
 
-  console.log(await response.json());
-  return null;
+  const responseData = (await response.json()) as APIResponse;
+
+  const results = extractSpecificData(responseData);
+
+  if (responseData.status === 0 && responseData.returned === 0)
+    return {
+      status: 0,
+      message: "Lookup PASSED, keine Treffer gefunden.",
+      returned: 0,
+    };
+  //Lookup PASSED, No Records Found
+  else return results; // Lookup PASSED, Records are in the Database
 }

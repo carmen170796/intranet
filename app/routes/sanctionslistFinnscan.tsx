@@ -8,12 +8,14 @@ import {
   OrderedList,
   UnorderedList
 } from '@chakra-ui/react'
+import { Table, TableCaption, TableContainer, Tbody, Th, Thead, Tr, Td } from '@chakra-ui/table';
 import type { ActionArgs } from '@remix-run/node';
 import type { V2_MetaFunction } from '@remix-run/react';
-import { useNavigation, Form } from '@remix-run/react';
+import { useNavigation, Form, useActionData } from '@remix-run/react';
 import type { ChangeEvent } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { processData } from '~/utils/finscan';
+import type { APIResponse } from '~/utils/types';
 
 export const meta: V2_MetaFunction = () => [{ title: "Sanktionslisten FinScan" }];
 
@@ -30,18 +32,21 @@ export const action = async ({ request }: ActionArgs) => {
     throw new Error("Dieser Datei- oder MIME-Typ ist leider nicht zulässig!");
   }
 
-  let apiResponse;
   if (name) {
-    apiResponse = await processData(name);
+    return [await processData(name) as Partial<APIResponse>];
   } else {
-    apiResponse = await processData(namesFile);
+    return await processData(namesFile) as Array<Partial<APIResponse>>;
   }
-
-  return apiResponse;
 }
 
 export default function SanctionslistFinnscan() {
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
+  const [results, setResults] = useState<Array<Partial<APIResponse>>>([]);
+
+  const formSubmitData = useActionData<typeof action>();
+  useEffect(() => {
+    setResults(formSubmitData as Array<Partial<APIResponse>>);
+  }, [formSubmitData]);
 
   const navigation = useNavigation();
   const textButton = navigation.state === "submitting" ? "Warten" : "Prüfen";
@@ -86,14 +91,41 @@ export default function SanctionslistFinnscan() {
 
       <Button
         isLoading={ isLoading }
-        className="primaryButton"
+        mt={ 4 }
+        bg='ea.blue'
+        _hover={ { bg: "blue.500" } }
         color='white'
         display='block'
         type='submit'
-        variant='outline'
       >
         { textButton }
       </Button>
+
+      {
+        (results && results.length > 0) && <TableContainer>
+          <Table variant='simple'>
+            <TableCaption>Ergebnisse</TableCaption>
+            <Thead>
+              <Tr>
+                <Th>Name</Th>
+                <Th>Found</Th>
+                <Th>Message</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {
+                results && results.length > 0 && results.map((result) =>
+                  <Tr key={ result.searchResults && result.searchResults[0].clientName }>
+                    <Td>{ result.searchResults && result.searchResults[0].clientName }</Td>
+                    <Td>{ result.returned }</Td>
+                    <Td>{ result.message }</Td>
+                  </Tr>
+                )
+              }
+            </Tbody>
+          </Table>
+        </TableContainer>
+      }
 
       <h2 className='text-red-600 font-bold mt-4'>Achtung: Das ist keine Testumgebung. Bitte nur erforderliche Prüfungen vornehmen, keine Testprüfungen.</h2>
       <h3 className='text-m text-eablue mt-4'>Folgende Informationen müssen geprüft werden:</h3>
