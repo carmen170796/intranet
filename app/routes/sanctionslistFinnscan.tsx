@@ -14,6 +14,8 @@ import type { V2_MetaFunction } from '@remix-run/react';
 import { useNavigation, Form, useActionData } from '@remix-run/react';
 import type { ChangeEvent } from 'react';
 import { useEffect, useState } from 'react';
+import exportPDF from '~/components/ExportPDF';
+
 import { processData } from '~/utils/finscan';
 import type { APIResponse } from '~/utils/types';
 
@@ -28,7 +30,7 @@ export const action = async ({ request }: ActionArgs) => {
     throw new Error("Sie müssen entweder eine Datei oder Name eingeben!");
   }
 
-  if (namesFile.type !== 'text/csv' && namesFile.type !== 'text/xml' && namesFile.type !== 'application/octet-stream') {
+  if (!namesFile && namesFile.type !== 'text/csv') {
     throw new Error("Dieser Datei- oder MIME-Typ ist leider nicht zulässig!");
   }
 
@@ -82,29 +84,39 @@ export default function SanctionslistFinnscan() {
         <Input name='namesFile'
           type='file'
           size='sm'
-          accept=".csv, .xml, .dta"
+          accept=".csv"
           className='w-96 ml-1' />
 
-        <FormHelperText className='ml-4 text-black'>(DTAUS, XML und CSV Dateien sind zulässig)</FormHelperText>
+        <FormHelperText className='ml-4 text-black'>(Nur CSV Dateien sind zulässig)</FormHelperText>
 
       </FormControl>
 
-      <Button
-        isLoading={ isLoading }
-        mt={ 4 }
-        bg='ea.blue'
-        _hover={ { bg: "blue.500" } }
-        color='white'
-        display='block'
-        type='submit'
-      >
-        { textButton }
-      </Button>
+      <div className='flex flex-row justify-between'>
+        <Button
+          isLoading={ isLoading }
+          mt={ 4 }
+          bg='ea.blue'
+          _hover={ { bg: "blue.500" } }
+          color='white'
+          display='block'
+          type='submit'
+        >
+          { textButton }
+        </Button>
+        <Button
+          onClick={ exportPDF }
+          mt={ 4 }
+          mr={ 4 }
+          bg='ea.blue'
+          _hover={ { bg: "blue.500" } }
+          color='white'
+          display='block'>Export PDF</Button>
+      </div>
 
       {
         (results && results.length > 0) && <TableContainer>
-          <Table variant='simple'>
-            <TableCaption>Ergebnisse</TableCaption>
+          <Table variant='simple' id='results-table'>
+            <TableCaption placement='top'>Ergebnisse am { new Date().toDateString() }</TableCaption>
             <Thead>
               <Tr>
                 <Th>Name</Th>
@@ -114,9 +126,9 @@ export default function SanctionslistFinnscan() {
             </Thead>
             <Tbody>
               {
-                results && results.length > 0 && results.map((result) =>
-                  <Tr key={ result.searchResults && result.searchResults[0].clientName }>
-                    <Td>{ result.searchResults && result.searchResults[0].clientName }</Td>
+                results && results.length > 0 && results.filter((result) => result.returned != 0).map((result) =>
+                  <Tr key={ result.searchResults ? result.searchResults[0].clientName : result.clientId }>
+                    <Td>{ result.searchResults ? result.searchResults[0].clientName : result.clientId }</Td>
                     <Td>{ result.returned }</Td>
                     <Td>{ result.message }</Td>
                   </Tr>

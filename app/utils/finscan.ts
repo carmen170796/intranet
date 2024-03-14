@@ -23,11 +23,7 @@ export async function processData(
       });
       await Promise.allSettled(dataCollectionPromises);
       return results;
-    } /* else if (data.type === "text/xml") {
-      namesArray = processXMLFile(data);
-    } else {
-      namesArray = processDTAFile(data);
-    } */
+    }
   }
   return null;
 }
@@ -43,14 +39,6 @@ async function processCSVFile(file: File): Promise<Array<string>> {
 
   return namesColumnData;
 }
-
-// function processXMLFile(File: File): Array<string> {
-//   return [];
-// }
-
-// function processDTAFile(File: File): Array<string> {
-//   return [];
-// }
 
 function extractSpecificData(apiResponse: APIResponse): Partial<APIResponse> {
   const extractedData = {
@@ -169,9 +157,10 @@ export async function checkNameFinscan(
 
   if (responseData.status === 0 && responseData.returned === 0)
     return {
-      status: 0,
-      message: "Lookup PASSED, keine Treffer gefunden.",
-      returned: 0,
+      clientId: nameLine,
+      status: responseData.status,
+      message: responseData.message,
+      returned: responseData.status,
     };
   //Lookup PASSED, No Records Found
   else return results; // Lookup PASSED, Records are in the Database
