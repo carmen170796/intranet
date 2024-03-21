@@ -126,8 +126,8 @@ export default function SanctionslistFinnscan() {
             </Thead>
             <Tbody>
               {
-                results && results.length > 0 && results.filter((result) => result.returned != 0).map((result) =>
-                  <Tr key={ result.searchResults ? result.searchResults[0].clientName : result.clientId }>
+                results && results.length > 0 && results.filter((result) => result.returned != 0).map((result, index) =>
+                  <Tr key={ result.searchResults ? `result.searchResults[0].clientName_${index}` : result.clientId }>
                     <Td>{ result.searchResults ? result.searchResults[0].clientName : result.clientId }</Td>
                     <Td>{ result.returned }</Td>
                     <Td>{ result.message }</Td>
