@@ -80,7 +80,8 @@ export async function checkNameFinscan(
     new Date()
       .toISOString()
       .replace(/[^0-9]/g, "")
-      .slice(0, 14);
+      .slice(0, 14) +
+    Math.random();
 
   const userName = USERNAME;
   const password = PASSWORD;
