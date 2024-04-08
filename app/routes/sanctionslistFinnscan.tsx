@@ -142,6 +142,7 @@ export default function SanctionslistFinnscan() {
 
       <div className='flex flex-row justify-between'>
         <Button
+          className="primaryButton"
           isLoading={ isLoading }
           mt={ 4 }
           bg='ea.blue'
@@ -158,8 +159,9 @@ export default function SanctionslistFinnscan() {
           mr={ 4 }
           bg='ea.blue'
           _hover={ { bg: "blue.500" } }
+          className="primaryButton"
           color='white'
-          display='block'>Export PDF</Button> }
+          display='block'>PDF Exportieren</Button> }
       </div>
 
       {
