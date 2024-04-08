@@ -14,7 +14,8 @@ import type { V2_MetaFunction } from '@remix-run/react';
 import { useNavigation, Form, useActionData } from '@remix-run/react';
 import type { ChangeEvent } from 'react';
 import { useEffect, useState } from 'react';
-import exportPDF from '~/components/ExportPDF';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 import { processData } from '~/utils/finscan';
 import type { APIResponse } from '~/utils/types';
@@ -49,6 +50,53 @@ export default function SanctionslistFinnscan() {
   useEffect(() => {
     setResults(formSubmitData as Array<Partial<APIResponse>>);
   }, [formSubmitData]);
+
+  useEffect(() => {
+    // Setting up the virtual file system fonts for pdfMake
+    pdfMake.vfs = pdfFonts.pdfMake.vfs;
+  }, []);
+
+  const generatePDF = (results: Partial<APIResponse>[], fileName: string) => {
+    const complianceRecordsRows = results && results.length > 0 && results.filter((result) => result.returned != 0).map(result =>
+      [result.searchResults ? result.searchResults[0].clientName : result.clientId, result.returned, result.message, '']
+    );
+
+    const documentDefinition = {
+      content: [
+        {
+          text: `Name der hochgeladenen Datei: ${fileName}`,
+          style: 'subheader',
+          alignment: 'center',
+          bold: true
+        },
+        {
+          text: `Ergebnisse am ${new Date().toLocaleString()}`,
+          style: 'subheader',
+          alignment: 'center',
+          bold: true
+        },
+        {
+          table: {
+            widths: ['*', 55, '*', '*'],
+            body: [
+              [{ text: 'Name', bold: true }, { text: 'Gefunden', bold: true }, { text: 'Info', bold: true }, { text: 'Notiz', bold: true }],
+              ...complianceRecordsRows,
+            ],
+          },
+          layout: {
+            paddingLeft: function (i, node) { return 4; },
+            paddingRight: function (i, node) { return 4; },
+            paddingTop: function (i, node) { return 2; },
+            paddingBottom: function (i, node) { return 2; },
+          },
+        }
+      ]
+    };
+
+    pdfMake.createPdf(documentDefinition).download('Finscan_Results.pdf');
+  };
+
+  const [fileName, setFileName] = useState("");
 
   const navigation = useNavigation();
   const textButton = navigation.state === "submitting" ? "Warten" : "Prüfen";
@@ -85,6 +133,7 @@ export default function SanctionslistFinnscan() {
           type='file'
           size='sm'
           accept=".csv"
+          onChange={ (event: ChangeEvent<HTMLInputElement>) => event.target.files?.length && setFileName(event.target.files[0].name) }
           className='w-96 ml-1' />
 
         <FormHelperText className='ml-4 text-black'>(Nur CSV Dateien sind zulässig)</FormHelperText>
@@ -103,14 +152,14 @@ export default function SanctionslistFinnscan() {
         >
           { textButton }
         </Button>
-        <Button
-          onClick={ exportPDF }
+        { (results && results.length > 0) && <Button
+          onClick={ () => generatePDF(results, fileName) }
           mt={ 4 }
           mr={ 4 }
           bg='ea.blue'
           _hover={ { bg: "blue.500" } }
           color='white'
-          display='block'>Export PDF</Button>
+          display='block'>Export PDF</Button> }
       </div>
 
       {
